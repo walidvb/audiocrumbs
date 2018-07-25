@@ -25,9 +25,10 @@ document.onload = function () {
     console.log(typeof data, data)
     switch (data.command) {
       case 'loadMp3':
-        player = $('<audio><source src="' + data.src + '"/></audio>');
+        player = $('<audio controls><source src="' + data.src + '"/></audio>');
         nativePlayer = player.get(0);
         nativePlayer.pause();
+
         player.appendTo('.player-container');
         return
       case 'play':
