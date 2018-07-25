@@ -23,6 +23,7 @@ document.onload = function () {
       return;
     }
     console.log(typeof data, data)
+    logToScreen(data);
     switch (data.command) {
       case 'loadMp3':
         player = $('<audio controls><source src="' + data.src + '"/></audio>');
@@ -55,6 +56,9 @@ document.onload = function () {
     button.click(function(){
       sendMessage({ command: 'ready' });
     })
+  }
+  function logToScreen(data){
+    $('.logger').html($('.logger').html() + JSON.stringify(data))
   }
 }
 document.onload()
