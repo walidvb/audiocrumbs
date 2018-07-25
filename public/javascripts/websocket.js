@@ -7,9 +7,6 @@ document.onload = function () {
 
   var connection = new WebSocket('ws://127.0.0.1:1337');
 
-  connection.onopen = function () {
-  };
-
   connection.onerror = function (error) {
     // an error occurred when sending/receiving data
   };
@@ -41,7 +38,7 @@ document.onload = function () {
   function handleUserReady(){
     const button = $(".ready-button");
     button.click(function(){
-      sendMessage({ connected: true });
+      sendMessage({ command: 'ready' });
     })
   }
 }
