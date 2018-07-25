@@ -11,25 +11,39 @@ document.onload = function () {
     // an error occurred when sending/receiving data
   };
 
+  var player, nativePlayer;
   connection.onmessage = function (message) {
-    // try to decode json (I assume that each message
-    // from server is json)
+    console.log("message", message)
+    var data;
     try {
-      var data = JSON.parse(message.data);
-      console.log(data)
-      if (data.command == 'play'){
-        play();
-      }
+      data = JSON.parse(message.data);
     } catch (e) {
       console.log('This doesn\'t look like a valid JSON: ',
-        message.data);
+        message.data, e);
       return;
+    }
+    console.log(typeof data, data)
+    switch (data.command) {
+      case 'loadMp3':
+        player = $('<audio><source src="' + data.src + '"/></audio>');
+        nativePlayer = player.get(0);
+        nativePlayer.pause();
+        player.appendTo('.player-container');
+        return
+      case 'play':
+        play();
+        return
+      default:
+        console.log('default')
+    }
+    if (data.command == 'play') {
+      play();
     }
     // handle incoming message
   };
 
   function play(){
-    mymp3.play();
+    nativePlayer.play();
   }
 
   function sendMessage(msg){
