@@ -1,5 +1,9 @@
 html(lang="en")
   head
-    script(src="/javascripts/websocket.js")
+    script(src="https://code.jquery.com/jquery-1.12.4.min.js")
   body
     h1 HELLO
+    .ready-button I'm ready
+    audio#mymp3(controls)
+      source(src="/images/yaya.mp3")
+    script(src="/javascripts/websocket.js")
