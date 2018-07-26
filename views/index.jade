@@ -11,9 +11,13 @@ html(lang="en")
         input#peer-count-input(type='number', name='peersTotal')
       .ready-button.button I'm ready
       .status
-        span Connected people: 
+        span Ready people: 
         span.peers-count 0
-      hr
-      .player-container
-      .logger
+        span /
+        span.peers-min-count ?
+      .debug
+        .fade for development purposes
+        hr
+        .player-container
+        .logger
     script(src="/javascripts/websocket.js")

@@ -38,7 +38,8 @@ document.onload = function () {
         player.appendTo('.player-container');
         return
       case 'peersCount':
-        $('.peers-count').html(data.payload);
+        $('.peers-count').html(data.payload.peersCount);
+        $('.peers-min-count').html(data.payload.minClientsCount);
         return;
       case 'play':
         play();

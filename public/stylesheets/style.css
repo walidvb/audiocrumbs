@@ -36,3 +36,16 @@ input:focus{
   border-bottom-color: grey;
   outline: none;
 }
+
+.fade{
+  opacity: .6;
+  font-style: italic;
+  font-size: .8rem;
+}
+
+/* DEBUG THINGS */
+.debug{
+  padding-top: 4rem;
+  /* uncomment to hide debug information */
+  /* display: none; */
+}
