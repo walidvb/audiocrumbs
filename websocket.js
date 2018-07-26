@@ -8,6 +8,7 @@ const commonMp3 = 'yaya.mp3';
 function setupNewWebSocket(request) {
   const connection = request.accept(null, request.origin);
   clients.push({ connection });
+  console.log("New connection, total:", clients.length);
   broadcast({
     command: 'peersCount',
     payload: clients.length-1,
