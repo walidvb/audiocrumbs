@@ -4,8 +4,9 @@ document.onload = function () {
 
   // if user is running mozilla then use it's built-in WebSocket
   window.WebSocket = window.WebSocket || window.MozWebSocket;
-
-  var connection = new WebSocket('ws://'+location.host);
+  // useful for local development
+  var protocol = /s/.test(location.protocol) ? 'wss' : 'ws'
+  var connection = new WebSocket(protocol + '://' + location.host);
 
   connection.onerror = function (error) {
     // an error occurred when sending/receiving data
