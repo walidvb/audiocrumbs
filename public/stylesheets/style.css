@@ -1,8 +1,38 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font: 18px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-a {
-  color: #00B7FF;
+.container{
+  max-width: 100%;
+  margin: 50px auto 0;
+}
+
+@media (min-width:767px){
+  .container{
+    max-width: 800px;
+  }
+}
+.button{
+  padding: 5px .8rem;
+  background-color: blueviolet;
+  color: white;
+  text-transform: uppercase;
+  margin: 1rem auto 1rem;
+  max-width: 150px;
+  text-align: center;
+}
+
+label{
+  margin-right: .5rem;
+}
+input{
+  border: none;
+  box-shadow: none;
+  border-bottom: 1px solid lightgrey;
+  font-size: inherit;
+}
+input:focus{
+  border-bottom-color: grey;
+  outline: none;
 }

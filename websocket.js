@@ -1,4 +1,4 @@
-const minConnectionsCount = 2;
+let minClientsCount = 1;
 let readyCount = 0;
 let clients = [];
 
@@ -11,7 +11,7 @@ function setupNewWebSocket(request) {
   console.log("New connection, total:", clients.length);
   broadcast({
     command: 'peersCount',
-    payload: clients.length-1,
+    payload: clients.length,
   })
   const selectedMp3 = mp3s.length == 0 ? commonMp3 : mp3s.pop();
   sendMessage({
@@ -24,12 +24,12 @@ function setupNewWebSocket(request) {
   connection.on('message', handleMessage);
   
   connection.on('close', function () {
-    console.log('lost connection')
     clients = clients.filter((conn) => conn.connection != connection);
     readyCount--;
+    console.log('lost connection. New ready count:', readyCount)
     broadcast({
       command: 'peersCount',
-      payload: clients.length-1,
+      payload: clients.length,
     })
   });
   
@@ -43,9 +43,12 @@ function setupNewWebSocket(request) {
         case 'ready':
         // don't let a client be ready twice
         if(connection.ready){return}
+        // if a totalPeers count was sent, set it
+        minClientsCount = data.totalPeers || minClientsCount
+        console.log("minCli", minClientsCount);
         connection.ready = true
-        readyCount++
-        if (readyCount >= minConnectionsCount){ 
+        readyCount++;
+        if (readyCount >= minClientsCount){ 
           broadcast({
             command: 'play',
           });

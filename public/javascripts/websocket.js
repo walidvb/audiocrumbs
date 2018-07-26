@@ -1,3 +1,9 @@
+// force https, as it doesn't seem to automatically redirect
+var secure = /s/.test(location.protocol)
+var protocol = secure ? 'wss' : 'ws';
+if(!secure && !/localhost/.test(location.host)){
+  window.location = 'https://' + location.host;
+}
 
 document.onload = function () {
   handleUserReady()
@@ -5,25 +11,23 @@ document.onload = function () {
   // if user is running mozilla then use it's built-in WebSocket
   window.WebSocket = window.WebSocket || window.MozWebSocket;
   // useful for local development
-  var protocol = /s/.test(location.protocol) ? 'wss' : 'ws'
   var connection = new WebSocket(protocol + '://' + location.host);
 
   connection.onerror = function (error) {
-    // an error occurred when sending/receiving data
+    console.log('Error connecting to the socket', error);
   };
 
   var player, nativePlayer;
   connection.onmessage = function (message) {
-    console.log("message", message)
     var data;
     try {
       data = JSON.parse(message.data);
     } catch (e) {
       console.log('This doesn\'t look like a valid JSON: ',
-        message.data, e);
+      message.data, e);
       return;
     }
-    console.log(typeof data, data)
+    console.log("message", message.data);
     logToScreen(data);
     switch (data.command) {
       case 'loadMp3':
@@ -35,6 +39,7 @@ document.onload = function () {
         return
       case 'peersCount':
         $('.peers-count').html(data.payload);
+        return;
       case 'play':
         play();
         return
@@ -57,12 +62,20 @@ document.onload = function () {
   function handleUserReady(){
     const button = $(".ready-button");
     button.click(function(){
-      sendMessage({ command: 'ready' });
+      var msg = { command: 'ready' };
+
+      // if the input is present and filled, send the number
+      // whoever sends first will remove the others
+      var totalPeers = $('#peer-count-input').val()
+      if (totalPeers && totalPeers != ''){
+        msg.totalPeers = totalPeers;
+      }
+      sendMessage(msg);
       button.replaceWith($('<div>Waiting for others</div>'))
     })
   }
   function logToScreen(data){
-    $('.logger').html($('.logger').html() + JSON.stringify(data))
+    $('.logger').append($('<div>'+JSON.stringify(data)+'</div>'))
   }
 }
 document.onload()

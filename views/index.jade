@@ -1,12 +1,19 @@
 html(lang="en")
   head
     script(src="https://code.jquery.com/jquery-1.12.4.min.js")
+    link(href='/stylesheets/style.css', rel='stylesheet')
   body
-    h1 HELLO
-    .ready-button I'm ready
-    .player-container
-    .status
-      span Connected peers: 
-      span.peers-count 0
-    .logger
+    .container
+      h1 HELLO
+
+      div
+        label(for='peersTotal') How many people will join your visit?
+        input#peer-count-input(type='number', name='peersTotal')
+      .ready-button.button I'm ready
+      .status
+        span Connected people: 
+        span.peers-count 0
+      hr
+      .player-container
+      .logger
     script(src="/javascripts/websocket.js")
