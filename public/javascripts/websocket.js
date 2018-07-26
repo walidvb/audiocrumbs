@@ -5,7 +5,7 @@ document.onload = function () {
   // if user is running mozilla then use it's built-in WebSocket
   window.WebSocket = window.WebSocket || window.MozWebSocket;
 
-  var connection = new WebSocket('ws://127.0.0.1:1337');
+  var connection = new WebSocket('ws://'+location.host);
 
   connection.onerror = function (error) {
     // an error occurred when sending/receiving data
@@ -26,12 +26,14 @@ document.onload = function () {
     logToScreen(data);
     switch (data.command) {
       case 'loadMp3':
-        player = $('<audio controls><source src="' + data.src + '"/></audio>');
+        player = $('<audio controls><source src="' + data.payload + '"/></audio>');
         nativePlayer = player.get(0);
         nativePlayer.pause();
 
         player.appendTo('.player-container');
         return
+      case 'peersCount':
+        $('.peers-count').html(data.payload);
       case 'play':
         play();
         return
@@ -55,6 +57,7 @@ document.onload = function () {
     const button = $(".ready-button");
     button.click(function(){
       sendMessage({ command: 'ready' });
+      button.replaceWith($('<div>Waiting for others</div>'))
     })
   }
   function logToScreen(data){
