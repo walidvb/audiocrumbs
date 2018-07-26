@@ -39,7 +39,11 @@ document.onload = function () {
         return
       case 'peersCount':
         $('.peers-count').html(data.payload.peersCount);
-        $('.peers-min-count').html(data.payload.minClientsCount);
+        var minClientsCount = data.payload.minClientsCount;
+        $('.peers-min-count').html(minClientsCount);
+        if (minClientsCount){
+          $('.input-container').hide()
+        }
         return;
       case 'play':
         play();

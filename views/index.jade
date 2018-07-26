@@ -4,9 +4,9 @@ html(lang="en")
     link(href='/stylesheets/style.css', rel='stylesheet')
   body
     .container
-      h1 HELLO
+      h1 AUDIOCRUMBS
 
-      div
+      div.input-container
         label(for='peersTotal') How many people will join your visit?
         input#peer-count-input(type='number', name='peersTotal')
       .ready-button.button I'm ready
@@ -15,8 +15,8 @@ html(lang="en")
         span.peers-count 0
         span /
         span.peers-min-count ?
-      .debug
-        .fade for development purposes
+      .debug.debug-on
+        .fade for development purposes(change class of this element)
         hr
         .player-container
         .logger

@@ -47,5 +47,7 @@ input:focus{
 .debug{
   padding-top: 4rem;
   /* uncomment to hide debug information */
-  /* display: none; */
+}
+.debug-off{
+  display: none;
 }
