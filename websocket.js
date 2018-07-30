@@ -2,19 +2,14 @@ let minClientsCount;
 let readyCount = 0;
 let clients = [];
 
-const mp3s = ['dimensia.mp3'];
+const mp3s = ['dimensia.mp3', 'dimensia2.mp3'];
 const commonMp3 = 'yaya.mp3';
+let sessionId = uuid();
 
 function setupNewWebSocket(request) {
   const connection = request.accept(null, request.origin);
   console.log("New connection, total:", clients.length);
   
-  const mp3 = mp3s.length == 0 ? commonMp3 : mp3s.pop();
-  clients.push({ connection, mp3 });
-  sendMessage({
-    command: 'loadMp3',
-    payload: '/images/' + mp3,
-  });
   sendMessage({
     command: 'peersCount',
     payload: {
@@ -28,7 +23,7 @@ function setupNewWebSocket(request) {
   connection.on('message', handleMessage);
   
   connection.on('close', function () {
-    clients = clients.filter((conn) => conn.connection != connection);
+    connection.ready = false;
     readyCount = Math.max(readyCount - 1, 0);
     console.log('lost connection. New ready count:', readyCount)
     broadcast({
@@ -45,8 +40,21 @@ function setupNewWebSocket(request) {
     if (message.type === 'utf8') {
       // process WebSocket message
       const data = JSON.parse(message.utf8Data);
-      console.log(data, readyCount);
+      console.log(data, readyCount, clients.map(({id, ready, mp3}) => ({id, ready, mp3})));
       switch(data.command){
+        case 'connected':
+          const existing = clients.some(c => c.id === data.id);
+          if(!existing){
+            const mp3 = data.mp3 || (mp3s.length == 0 ? commonMp3 : mp3s.pop());
+            clients.push({ connection, mp3, id: data.id });
+            sendMessage({
+              command: 'loadMp3',
+              payload: {
+                src: '/images/' + mp3,
+              },
+            });
+          }
+          return;
         // this currently combines being ready 
         // and handling the number of peers required to start
         case 'ready':
@@ -80,8 +88,23 @@ function setupNewWebSocket(request) {
     clients.forEach((client) => sendMessage(msg, client.connection));
   }
   function sendMessage(obj, con = connection){
+    obj.sessionId = sessionId;
     con.sendUTF(JSON.stringify(obj));
   }
+}
+
+
+function uuid() {
+  var uuid = "", i, random;
+  for (i = 0; i < 32; i++) {
+    random = Math.random() * 16 | 0;
+
+    if (i == 8 || i == 12 || i == 16 || i == 20) {
+      uuid += "-"
+    }
+    uuid += (i == 12 ? 4 : (i == 16 ? (random & 3 | 8) : random)).toString(16);
+  }
+  return uuid;
 }
 
 module.exports = setupNewWebSocket;
