@@ -1,0 +1,26 @@
+.container.page.on
+  .input-container
+    label(for='peersTotal') How many people will join your visit?
+    input#peer-count-input(type='number', name='peersTotal', placeholder="Minimum 12 persons")
+  .ready-button.btn Ready
+  .status
+    span.peers-count 0
+    span &nbsp;/&nbsp;
+    span.peers-min-count ?
+    span &nbsp; people connected 
+.container.page.waiting.off
+  .lds-ellipsis
+    div
+    div
+    div
+  .status
+    span.peers-count 0
+    span /
+    span.peers-min-count ?
+    span people connected 
+script(src="/javascripts/websocket.js")
+.debug.debug-off
+  .player-container
+  .fade for development purposes(change class of this element)
+  hr
+  .logger

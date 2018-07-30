@@ -41,9 +41,8 @@ document.onload = function () {
         $('.peers-count').html(data.payload.peersCount);
         var minClientsCount = data.payload.minClientsCount;
         $('.peers-min-count').html(minClientsCount);
-        if (minClientsCount){
-          $('.input-container').hide()
-        }
+        var canChangPeersCount = minClientsCount !== undefined;
+        $('.input-container').toggle(!canChangPeersCount);
         return;
       case 'play':
         play();
@@ -71,12 +70,12 @@ document.onload = function () {
 
       // if the input is present and filled, send the number
       // whoever sends first will remove the others
-      var totalPeers = $('#peer-count-input').val()
+      var totalPeers = $('#peer-count-input').val();
       if (totalPeers && totalPeers != ''){
         msg.totalPeers = totalPeers;
       }
       sendMessage(msg);
-      button.replaceWith($('<div>Waiting for others</div>'))
+      $('.page').toggleClass('on off');
     })
   }
   function logToScreen(data){

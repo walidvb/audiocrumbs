@@ -1,26 +1,10 @@
-#page-1.page
-  a.container{href="/begin"}
-    .page-header
-      h1 AUDIOCRUMBS
-      image.logo(src="http://placehold.it/150")
-      p Not your regular audio tour
+#wrapper.container.centered
+  .page-header
+    image.logo(src="/images/logo-01.png")
+      p – Not your regular audio tour –
 
-      image(src="http://placehold.it/250")
+  a(href="/experiences")
+    image.logo-large(src="/images/logo-02.png")
 
-      p Touch to begin
-#page-2.page
-    div.input-container
-      label(for='peersTotal') How many people will join your visit?
-      input#peer-count-input(type='number', name='peersTotal')
-    .ready-button.button I'm ready
-    .status
-      span Ready people: 
-      span.peers-count 0
-      span /
-      span.peers-min-count ?
-    .debug.debug-on
-      .fade for development purposes(change class of this element)
-      hr
-      .player-container
-      .logger
-  script(src="/javascripts/websocket.js")
+  a(href="/experiences")
+    p.text-muted Touch to begin

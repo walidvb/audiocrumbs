@@ -1,0 +1,7 @@
+a, a:hover, a:visited{
+  text-decoration: none;
+  color: inherit;
+}
+p a{
+  text-decoration: underline;
+}
