@@ -1,10 +1,21 @@
-let minClientsCount;
-let readyCount = 0;
-let clients = [];
+const fetchFiles = require('./fileManager');
 
-const mp3s = ['dimensia.mp3', 'dimensia.mp3'];
-const commonMp3 = 'yaya.mp3';
-let sessionId = uuid();
+let minClientsCount, readyCount, clients;
+
+let files = {custom:[]};
+
+
+let sessionId;
+
+function init(){
+  fetchFiles(elems => files = elems);
+  sessionId = uuid();
+  clients = [];
+  readyCount = 0;
+  minClientsCount = undefined;
+}
+
+init();
 
 function setupNewWebSocket(request) {
   const connection = request.accept(null, request.origin);
@@ -17,15 +28,72 @@ function setupNewWebSocket(request) {
       minClientsCount
     },
   });
-  // This is the most important callback for us, we'll handle
-  // all messages from users here.
+
   
-  connection.on('message', handleMessage);
   
+  const handlers = {
+    connected: function(data){
+      const existing = clients.some(c => c.id === data.id);
+      if(!existing){
+        console.log(files);
+        const src = data.mp3 || (files.custom.length === 0 ? files.generic : files.custom.pop());
+        clients.push({ connection, src, id: data.id });
+        sendMessage({
+          command: 'loadMp3',
+          payload: {
+            src,
+          },
+        });
+      }
+      return;
+      // this currently combines being ready 
+      // and handling the number of peers required to start
+    },
+    ready: function(data){
+      // don't let a client be ready twice
+      if(connection.ready){return}
+      readyCount++;
+      connection.ready = true;
+      // if a totalPeers count was sent, set it
+      minClientsCount = data.totalPeers || minClientsCount
+      broadcast({
+        command: 'peersCount',
+        payload: {
+          peersCount: readyCount,
+          minClientsCount
+        }
+      })
+      connection.ready = true
+      if (readyCount >= minClientsCount){ 
+        broadcast({
+          command: 'play',
+        });
+      }
+      return
+    },
+    reset: function(data){
+      init();
+      broadcast({
+        command: 'reset',
+      })
+      return
+    }
+  }
+
+  connection.on('message', (message) => {
+    if (message.type === 'utf8') {
+      // process WebSocket message
+      const data = JSON.parse(message.utf8Data);
+      console.log(data.command);
+      console.log(data.payload, readyCount, clients.map(({ id, ready, src }) => ({ id, ready, src })));
+      handlers[data.command](data);
+    }
+  });
+
   connection.on('close', function () {
+    console.log('lost connection. New ready count:', readyCount, clients.map(c => ({ id: c.id, ready: c.ready, src: c.src })))
     connection.ready = false;
     readyCount = Math.max(readyCount - 1, 0);
-    console.log('lost connection. New ready count:', readyCount)
     broadcast({
       command: 'peersCount',
       payload: {
@@ -34,56 +102,7 @@ function setupNewWebSocket(request) {
       message: 'Lost a peer',
     })
   });
-  
-  
-  function handleMessage(message){
-    if (message.type === 'utf8') {
-      // process WebSocket message
-      const data = JSON.parse(message.utf8Data);
-      console.log(data, readyCount, clients.map(({id, ready, mp3}) => ({id, ready, mp3})));
-      switch(data.command){
-        case 'connected':
-          const existing = clients.some(c => c.id === data.id);
-          if(!existing){
-            const mp3 = data.mp3 || (mp3s.length == 0 ? commonMp3 : mp3s.pop());
-            clients.push({ connection, mp3, id: data.id });
-            sendMessage({
-              command: 'loadMp3',
-              payload: {
-                src: '/images/' + mp3,
-              },
-            });
-          }
-          return;
-        // this currently combines being ready 
-        // and handling the number of peers required to start
-        case 'ready':
-        // don't let a client be ready twice
-        if(connection.ready){return}
-        readyCount++;
-        // if a totalPeers count was sent, set it
-        minClientsCount = data.totalPeers || minClientsCount
-        broadcast({
-          command: 'peersCount',
-          payload: {
-            peersCount: readyCount,
-            minClientsCount
-          }
-        })
-        connection.ready = true
-        if (readyCount >= minClientsCount){ 
-          broadcast({
-            command: 'play',
-          });
-        }
-        return
-        default:
-        console.log('default')
-        console.log(data)
-      }
-      
-    }
-  }
+
   function broadcast(msg){
     clients.forEach((client) => sendMessage(msg, client.connection));
   }
@@ -98,7 +117,7 @@ function uuid() {
   var uuid = "", i, random;
   for (i = 0; i < 32; i++) {
     random = Math.random() * 16 | 0;
-
+    
     if (i == 8 || i == 12 || i == 16 || i == 20) {
       uuid += "-"
     }

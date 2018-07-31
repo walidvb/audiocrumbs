@@ -30,7 +30,13 @@ h1, h2, h3, h4, h5{
 .logo-small{
   margin-bottom: 2rem;
 }
-
+.logo-footer{
+  position: fixed;
+  max-width: 2rem;
+  bottom: 1rem;
+  left: 1rem;
+  opacity: .5;
+}
 
 .waiting.on{
   display: flex!important;
@@ -160,8 +166,12 @@ h1, h2, h3, h4, h5{
   margin: 1rem auto 1rem;
   text-align: center;
   display: block;
+  cursor: pointer;
 }
-
+.btn-disabled{
+  background-color: var(--grey);
+  cursor: auto;
+}
 label{
   margin-right: .5rem;
 }

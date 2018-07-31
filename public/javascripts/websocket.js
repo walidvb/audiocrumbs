@@ -7,17 +7,9 @@ if(!secure && !/localhost/.test(location.host)){
 var AUDIO_CRUMBS = 'audio_crumbs';
 
 
-var state = JSON.parse(localStorage.getItem(AUDIO_CRUMBS));
-var id = uuid();
-if (!state){
-  var state = { id }
-  saveState();
-}
-else{
-  console.log(state.sessionId)
-  setMp3(state.mp3);
-}
 
+var state = JSON.parse(localStorage.getItem(AUDIO_CRUMBS));
+console.log(state)
 var ready = false, 
   player, nativePlayer;
 
@@ -26,21 +18,51 @@ window.WebSocket = window.WebSocket || window.MozWebSocket;
 // useful for local development
 var connection = new WebSocket(protocol + '://' + location.host);
 
-document.onload = function () {
+var id = uuid();
+if (!state) {
+  var state = { id }
+  console.log('new state', state)
+  saveState();
+}
+else {
+  console.log(state.id, state.sessionId, state.mp3);
+}
+
+$(document).ready(function () {
   handleUserReady()
-
-
+  setMp3(state.mp3);
   
+  var handlers = {
+    loadMp3: function(data){
+      console.log(state, state.mp3)
+      if (state.mp3 === undefined) {
+        state.mp3 = data.payload.src;
+      }
+      setMp3(state.mp3)
+    },
+    peersCount: function(data){
+      $('.peers-count').html(data.payload.peersCount);
+      var minClientsCount = data.payload.minClientsCount;
+      $('.peers-min-count').html(minClientsCount);
+      var canChangPeersCount = minClientsCount !== undefined;
+      $('.input-container').toggle(!canChangPeersCount);
+    },
+    play: function(data){
+      play();
+    }
+  }
   connection.onerror = function (error) {
     console.log('Error connecting to the socket', error);
   };
   connection.onopen = function(){
-    sendMessage({ command: 'connected' })
+    sendMessage({ command: 'connected', mp3: state.mp3 })
   }
   connection.onmessage = function (message) {
     var data;
     try {
       data = JSON.parse(message.data);
+      console.log(data.command);
+      handlers[data.command](data);
     } catch (e) {
       console.log('This doesn\'t look like a valid JSON: ',
       message.data, e);
@@ -49,30 +71,7 @@ document.onload = function () {
     handleSession(data.sessionId);
     logToScreen(data);
     console.log(data);
-    switch (data.command) {
-      case 'loadMp3':
-        console.log(state, state.mp3)
-        if(state.mp3 === undefined){
-          state.mp3 = data.payload.src;
-        }
-        setMp3(state.mp3)
-        return
-      case 'peersCount':
-        $('.peers-count').html(data.payload.peersCount);
-        var minClientsCount = data.payload.minClientsCount;
-        $('.peers-min-count').html(minClientsCount);
-        var canChangPeersCount = minClientsCount !== undefined;
-        $('.input-container').toggle(!canChangPeersCount);
-        return;
-      case 'play':
-        play();
-        return
-      default:
-        console.log('default')
-    }
-    if (data.command == 'play') {
-      play();
-    }
+    handlers[data.command](data);
     // handle incoming message
   };
 
@@ -89,7 +88,8 @@ document.onload = function () {
   function logToScreen(data){
     $('.logger').append($('<div>'+JSON.stringify(data)+'</div>'))
   }
-}
+});
+
 function sendMessage(msg) {
   msg.id = state.id;
   connection.send(JSON.stringify(msg))
@@ -107,14 +107,14 @@ function beReady() {
   sendMessage(msg);
   $('.page').toggleClass('on off');
 }
-document.onload()
 
 
 function setMp3(src) {
-  player = $('<audio controls><source src="' + src + '"/></audio>');
+  $('body').append(src)
+  player = $('<audio class="debug-on" controls><source src="' + src + '"/></audio>');
   nativePlayer = player.get(0);
   nativePlayer.pause();
-  player.appendTo('.player-container');
+  $('.player-container').html(player);
   state.mp3 = src;
   saveState();
 }
@@ -139,6 +139,7 @@ function handleSession(sessionId){
     saveState();
   }
   else if(state.sessionId !== sessionId){
+    console.log('New Session');
     localStorage.removeItem(AUDIO_CRUMBS);
     ready = false;
     sendMessage({command: 'connected'})
