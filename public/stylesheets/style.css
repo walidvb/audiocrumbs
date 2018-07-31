@@ -76,7 +76,9 @@ h1, h2, h3, h4, h5{
 .flex-grow{
   flex-grow: 1;
 }
-
+.no-touch{
+  pointer-events: none;
+}
 
 
 .lds-ellipsis {

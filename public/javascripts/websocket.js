@@ -49,6 +49,9 @@ $(document).ready(function () {
     },
     play: function(data){
       play();
+    },
+    reset: function(){
+
     }
   }
   connection.onerror = function (error) {
@@ -62,13 +65,13 @@ $(document).ready(function () {
     try {
       data = JSON.parse(message.data);
       console.log(data.command);
+      handleSession(data.sessionId);
       handlers[data.command](data);
     } catch (e) {
       console.log('This doesn\'t look like a valid JSON: ',
       message.data, e);
       return;
     }
-    handleSession(data.sessionId);
     logToScreen(data);
     console.log(data);
     handlers[data.command](data);
@@ -88,6 +91,22 @@ $(document).ready(function () {
   function logToScreen(data){
     $('.logger').append($('<div>'+JSON.stringify(data)+'</div>'))
   }
+
+  var time;
+  $('#reset').on('touchstart mousedown click', function(evt){
+    evt.preventDefault();
+    time = new Date().getTime();  
+  })
+  $('#reset').on('touchend mouseup', function (evt) {
+    evt.preventDefault();
+    var now = new Date().getTime();
+    if( time && now - time > 5000){
+      sendMessage({command: 'reset'})
+    }
+    else{
+      time = null;
+    }
+  })
 });
 
 function sendMessage(msg) {

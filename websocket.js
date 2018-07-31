@@ -7,8 +7,15 @@ let files = {custom:[]};
 
 let sessionId;
 
-function init(){
-  fetchFiles(elems => files = elems);
+function init(cb){
+  const oldClients = clients;
+  fetchFiles(elems => {
+    files = elems;
+    console.log("Got files: ", files);
+    if(cb){
+      cb(oldClients);
+    }
+  });
   sessionId = uuid();
   clients = [];
   readyCount = 0;
@@ -45,10 +52,9 @@ function setupNewWebSocket(request) {
           },
         });
       }
-      return;
-      // this currently combines being ready 
-      // and handling the number of peers required to start
     },
+    // this currently combines being ready 
+    // and handling the number of peers required to start
     ready: function(data){
       // don't let a client be ready twice
       if(connection.ready){return}
@@ -69,14 +75,14 @@ function setupNewWebSocket(request) {
           command: 'play',
         });
       }
-      return
     },
-    reset: function(data){
-      init();
-      broadcast({
-        command: 'reset',
-      })
-      return
+    reset: function(){
+      init((oldClients) => {
+        console.log("Broadcasting reset")
+        broadcast({
+          command: 'reset',
+        }, oldClients)
+      });
     }
   }
 
@@ -84,9 +90,13 @@ function setupNewWebSocket(request) {
     if (message.type === 'utf8') {
       // process WebSocket message
       const data = JSON.parse(message.utf8Data);
-      console.log(data.command);
-      console.log(data.payload, readyCount, clients.map(({ id, ready, src }) => ({ id, ready, src })));
-      handlers[data.command](data);
+      console.log(data, readyCount, clients.map(({ id, ready, src }) => ({ id, ready, src })));
+      try{
+        handlers[data.command](data);
+      }
+      catch(e){
+        console.log("command not found", data);
+      }
     }
   });
 
@@ -103,8 +113,8 @@ function setupNewWebSocket(request) {
     })
   });
 
-  function broadcast(msg){
-    clients.forEach((client) => sendMessage(msg, client.connection));
+  function broadcast(msg, clients_ = clients){
+    clients_.forEach((client) => sendMessage(msg, client.connection));
   }
   function sendMessage(obj, con = connection){
     obj.sessionId = sessionId;

@@ -13,7 +13,7 @@ const fetchFiles = (callback) => {
       callback({
         generic,
         custom,
-        originalSrc: custom,
+        originalSrc: [...custom],
       });
     }
   });
