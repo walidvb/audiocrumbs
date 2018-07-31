@@ -78,7 +78,7 @@ document.onload = function () {
 
   function play(){
     $('.lds-ellipsis').addClass('finished');
-    setTimeout(nativePlayer.play, 500);
+    setTimeout(nativePlayer.play.bind(nativePlayer), 500);
   }
 
 

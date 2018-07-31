@@ -2,7 +2,7 @@ let minClientsCount;
 let readyCount = 0;
 let clients = [];
 
-const mp3s = ['dimensia.mp3', 'dimensia2.mp3'];
+const mp3s = ['dimensia.mp3', 'dimensia.mp3'];
 const commonMp3 = 'yaya.mp3';
 let sessionId = uuid();
 
