@@ -51,7 +51,7 @@ $(document).ready(function () {
       play();
     },
     reset: function(){
-
+      location.reload();
     }
   }
   connection.onerror = function (error) {
@@ -100,7 +100,7 @@ $(document).ready(function () {
   $('#reset').on('touchend mouseup', function (evt) {
     evt.preventDefault();
     var now = new Date().getTime();
-    if( time && now - time > 5000){
+    if( time && now - time > 1000){
       sendMessage({command: 'reset'})
     }
     else{
