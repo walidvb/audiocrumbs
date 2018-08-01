@@ -43,7 +43,7 @@ function setupNewWebSocket(request) {
       const existing = clients.some(c => c.id === data.id);
       if(!existing){
         console.log(files);
-        const src = data.mp3 || (files.custom.length === 0 ? files.generic : files.custom.pop());
+        const src = data.mp3 || (files.custom.length === 0 ? files.generic : files.custom.shift());
         clients.push({ connection, src, id: data.id });
         sendMessage({
           command: 'loadMp3',
